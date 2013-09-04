@@ -1,0 +1,142 @@
+import numpy as np 
+from pylab import plot,show,scatter
+import pandas as pd
+from pandas.io.data import DataReader
+from datetime import datetime, timedelta
+import os
+import sys
+import traceback
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+
+output = []
+testing_data = {}
+
+def read_training_data():
+	#labels
+	# 0 -> Hammer
+	# 1 -> Star
+	df = pd.read_csv("H:/Coop/Matt/training_data.csv", index_col=1)
+	labels = np.array(df.index)
+	data = np.array([df['VolumeSupport'], df['Percentage'], df['Direction']])
+	return data,labels
+
+def knn_classifier(x, D, labels, K):
+	""" Classify the vector x
+	 D - data matrix (each row is a pattern).
+	 labels - class of each pattern.
+	 K - number of neighbour to use.
+	 Returns the class label and the neighbors indexes.
+	"""
+	neig_idx,dist = knn_search(x,D,K)
+	counts = np.bincount(labels[neig_idx]) # voting
+	return np.argmax(counts),neig_idx,dist
+
+def knn_search(x, D, K):
+	""" find K nearest neighbours of data among D """
+	ndata = D.shape[1]
+	K = K if K < ndata else ndata
+	# euclidean distances from the other points
+
+	sqd = np.sqrt(((D - x[:,:ndata])**2).sum(axis=0))
+	idx = np.argsort(sqd) # sorting
+	dist = sqd[idx[0]]
+	# return the indexes of K nearest neighbours
+	return idx[:K],dist
+
+def graph(test_point, neig_idx, result):
+
+	df = pd.read_csv("H:/Coop/Matt/training_data.csv", index_col=1)
+	df_hammer=df[df.index==0]
+	hammer = np.array([df_hammer['VolumeSupport'], df_hammer['Percentage'], df_hammer['Direction']])
+	df_star=df[df.index==1]
+	star = np.array([df_star['VolumeSupport'], df_star['Percentage'], df_star['Direction']])
+
+	if result == 0:
+		classified = 'Hammer'
+	else:
+		classified = 'Shooting Star'
+	fig = plt.figure()
+	fig.suptitle('Classified as a ' + classified, fontsize=14, fontweight='bold')
+	ax = fig.add_subplot(111, projection='3d')
+	hammer_plt = ax.scatter(hammer[0], hammer[1], hammer[2], c='g', marker='o')
+	star_plt = ax.scatter(star[0], star[1], star[2], c='r', marker='^')
+	test_plt = ax.scatter(test_point[0], test_point[1], test_point[2],c='r',marker='*',s=100)	
+	ax.set_xlabel('Volume Support')
+	ax.set_ylabel('Percentage')
+	ax.set_zlabel('Direction')
+
+	plt.show()
+	# plotting the data and the input pattern
+	# class 1, red points, class 0 blue points
+	# scatter(data[0,:],data[1,:],data[2,:], c=labels,alpha=0.8)
+	# # scatter(test_point[0],test_point[1],test_point,marker='o',c='g',s=40)
+	# # highlighting the neighbours
+	# plot(data[0,neig_idx],data[1,neig_idx],data[2,neig_idx],'o',
+	#   markerfacecolor='None',markersize=15,markeredgewidth=1)
+	# show()
+
+def handle_data(data, labels):
+	df = pd.read_csv("H:/Coop/Matt/testing_data.csv")
+	for x in xrange(0,len(df.index)):
+		symbol = df[x:x+1:1]['Symbol'].values
+		date = df[x:x+1:1]['Date'].values
+		curr_date = datetime.strptime(str(date[0]), '%d/%m/%Y')
+		curr_date = datetime.strftime(curr_date, '%m/%d/%Y')
+		price = df[x:x+1:1]['Close'].values
+		test_point = np.array([df[x:x+1:1]['VolumeSupport'],df[x:x+1:1]['Percentage'],df[x:x+1:1]['Direction']])
+		print "Testing: " + str(test_point)
+		result, neigh_idx,dist = knn_classifier(test_point, data, labels, 5)
+		if dist < 0.05:
+			if (result==0):
+				try:
+					sell_date = datetime.strptime(str(date[0]), '%d/%m/%Y') + timedelta(days=14	)
+					print sell_date
+					print str(symbol[0])[str(symbol[0]).index(':')+1:].replace('.','-')+".TO"
+					goog = DataReader(str(symbol[0])[str(symbol[0]).index(':')+1:].replace('.','-') +".TO",  "yahoo", sell_date, sell_date)
+					sell_price = goog["Close"]
+					output.append(str(symbol[0]) +",Buy," + curr_date + ",100," + str(price[0]))
+					output.append(str(symbol[0]) +",Sell," + datetime.strftime(sell_date, '%m/%d/%Y') + ",100," + str(sell_price[0]))
+				except Exception, e:
+					pass
+				
+			elif (result==1):
+				try:
+					buy_cover_date = datetime.strptime(str(date[0]), '%d/%m/%Y') + timedelta(days=7)
+					print buy_cover_date
+					print str(symbol[0])[str(symbol[0]).index(':')+1:].replace('.','-')+".TO"
+					goog = DataReader(str(symbol[0])[str(symbol[0]).index(':')+1:].replace('.','-')+".TO",  "yahoo", buy_cover_date, buy_cover_date)
+					buy_cover_price = goog["Close"]
+					output.append(str(symbol[0]) +",Short," + curr_date + ",100," + str(price[0]))
+
+					output.append(str(symbol[0]) +",Cover," + datetime.strftime(buy_cover_date, '%m/%d/%Y') + ",100," + str(buy_cover_price[0]))
+				except Exception, e:
+					pass
+				
+
+	outfile = "H:/Coop/Matt/portfolio.csv"
+	with open(outfile, "wb") as out:
+		out.write("Symbol,Type,Date,Shares,Price\n")
+		for item in output:
+			out.write(str(item) + "\n")
+		out.close()
+
+	#star
+	# test_point = np.array([[1.25],[6.5],[0.12]])
+	#hammer
+	test_point = np.array([[1.25],[0.13],[-0.12]])
+	result, neig_idx,dist = knn_classifier(test_point, data, labels, 5)
+	graph(test_point, neig_idx, result)
+
+if __name__ == '__main__':
+	try:
+		data, labels = read_training_data()
+		handle_data(data, labels)
+		# test = [[0.84],[400],[0.192]]
+		# x = np.array(test)
+		# result, neigh_idx = knn_classifier(x, data, labels, 5)
+		# print 'Label assignment:', result
+	except Exception, e:
+		print "Error " + traceback.format_exc()
+        
+	
