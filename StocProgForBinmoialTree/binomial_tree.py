@@ -26,16 +26,16 @@ def getPrice(symbol, startDate, endDate):
     return data["Adj Close"][0]
 
 def ExpectedReturns(option):
-    tree = option.BinomialTreeEuropeanCallPrice()
+    tree, prices = option.BinomialTreeEuropeanCallPrice()
     p = 0.5
     expReturn = []
 
     probs = [p**4, 4*p**3*(1-p), 6*p**2*(1-p)**2, 4*p*(1-p)**3, p**4]
 
-    for i in range(0,len(tree[option.N])):
-        expReturn.append(max((tree[option.N][i]-option.strike)-tree[0][0],-tree[0][0]))
+    for i in range(option.N+1):
+        expReturn.append(max((prices[option.N][i]-option.strike)-tree[0][0],-tree[0][0]))
     
-    return tree, expReturn, probs
+    return tree, expReturn, probs, prices
 
 # if __name__ == '__main__':
 #     aapl = Option("AAPL", 500, 0.03, 30)
