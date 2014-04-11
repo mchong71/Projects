@@ -1,0 +1,60 @@
+\documentclass[12pt]{article}
+\usepackage{sydewkrpt}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{ragged2e}
+\newcolumntype{P}[1]{>{\RaggedRight\hspace{0pt}}p{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%    Begin Document    %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\pagenumbering{roman}
+
+\waterlootitle{Two-Stage Stochastic Programming Option Portfolio Using Binomial Tree Pricing\\}{
+  SYDE 531: Final Project
+}{
+  D. Scott Neil -- 20349210\\
+  Matthew Chong -- 20341648\\
+}
+
+%\dotableofcontents
+
+\newpage 
+\doublespacing
+\pagenumbering{arabic}
+\setlength{\parindent}{1cm}
+
+\section{Introduction}
+
+\section{Objective}
+To create an optimal portfolio of two independant options, priced using the Jarrow Rudd \ref{jarrow_rudd} binomial model, with the two-stage stochastic programming method.
+
+\section{Assumptions}
+The assumptions made are: the options mature in 4 months, the interest thing is 0.03, periods are measured as a month, other stuff
+
+\section{Objectives and Requirements}
+
+\section{Testing Methodology}
+
+\section{Two Option Portfolio}
+
+\section{n-option portfolio}
+this can easily be extended to encompass a larger portfolio, but just requires more data
+
+\section{Future Work}
+% include stock and other securities in model to make a well balanced portfolio
+% consider options over longer periods - using the real option data
+% include more options in model - this doesn't change calculations, just increases computation
+
+\section{Conclusion}
+
+
+\newpage
+\addcontentsline{toc}{section}{References}
+
+\bibliographystyle{IEEEtran}
+
+\bibliography{bib}
+
+\end{document}
