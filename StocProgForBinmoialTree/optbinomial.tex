@@ -3,7 +3,21 @@
 \usepackage{longtable}
 \usepackage{array}
 \usepackage{ragged2e}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{float}
+\usepackage[toc]{glossaries}
+\usepackage[toc,page]{appendix}
+
 \newcolumntype{P}[1]{>{\RaggedRight\hspace{0pt}}p{#1}}
+
+\newenvironment{conditions*}
+  {\par\vspace{\abovedisplayskip}\noindent\begin{tabular}{>{$}l<{$} @{${}={}$} l}}
+  {\end{tabular}\par\vspace{\belowdisplayskip}}
+
+\clubpenalty = 10000
+\widowpenalty = 10000
+\displaywidowpenalty = 10000
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%    Begin Document    %%%
@@ -26,28 +40,207 @@
 \setlength{\parindent}{1cm}
 
 \section{Introduction}
+The stock market involves the buying and selling of ownership (shares) of a public company.  There is an agreed upon price with which the trade is executed, and is eventually settled through an exchange (TSX, NASDAQ, etc.).  However, the stock market is just one aspect of the entire capital market. The derivatives market, for example, consists of financial instruments that are derived from other forms of securities (stocks, bonds, futures).  One of the better-known instruments is the option since one of the underlying assets is a stock. For the scope of this report the author will focus solely on options.
+
+A stock option can be very beneficial to any sophisticated portfolio. It is essentially “a contract that gives the buyer the right, but not the obligation, to buy or sell [a stock] at a specific price on or before a certain date.” [1]. The buyer must purchase the option at a price outlined in the options market. In brief, someone is selling you a right, which means the buyer must also pay a premium to enter in the contract. For the purpose of this report the researchers will use European Options, which are options that can only be exercised on the expiry date [2]. 
+
+Pricing of European options has been a well researched topic. The most widely accepted method is the use of the Black-Scholes formula. Based on the properties of the underlying asset the formula determines a theoretical fair price of the option at that specific moment in time. However, the formula does not take into account the randomness of the underlying stock price movement. The Binomial Tree Pricing Theory allows an investor to assign a probability to the movement of a stock price and then calculate the fair price of an option for any market condition. 
+
+For the purpose of this report the binomial model that is employed is the Jarrow-Rudd Model that assumes equal probability for each movement in stock price [3]. An example of a binomial tree can be found in <FIGURE X>. Each level represents a time period moving from one state to another. The nodes in the tree are the option price for a given a set of market conditions. The probabilities denoted by p, are the probabilities of the market moving to that state. Nodes that have more paths that lead to them are more likely to occur and therefore have higher probabilities of occurring. The randomness is then associated with the unknown movement of the market and consequently the underlying assets.
+
+ %http://www.4c.ucc.ie/~aholland/bordgais/BG_Ch5.pdf
+ 
+Portfolio optimization is the process of choosing the proportions of various assets to help improve a portfolio based on certain criterion. The criterion is combined directly or indirectly with considerations like the expected value of the portfolio’s rate of return, returns variability and other measures of financial risk. The goal of portfolio optimization is to reduce the risk an investor takes on while trying to maximize profit with an uncertainty of market conditions
+
 
 \section{Objective}
 To create an optimal portfolio of two independant options, priced using the Jarrow Rudd \ref{jarrow_rudd} binomial model, with the two-stage stochastic programming method.
 
 \section{Assumptions}
-The assumptions made are: the options mature in 4 months, the interest thing is 0.03, periods are measured as a month, other stuff
+%The assumptions made are: the options mature in 4 months, the interest thing is 0.03, periods are measured as a month, other stuff
 
-\section{Objectives and Requirements}
+The following assumptions were made to reduce the complexity of the design problem:
+\begin{itemize}
+	\item The time period to calculate volatility is from November 1, 2012 to January 1, 2013
+	\item The initial stock price is taken at January 1, 2013 (time = 0)
+	\item Time to maturity of option is 1 year and each time period is 4 months
+	\item The risk free interest rate is 3\%
+	\item The stock movements have equal probability of moving up or down
+	\item Use of European options that can only be exercised at maturity
+	\item Movement of each asset is independent of each other
+\end{itemize}
 
-\section{Testing Methodology}
+
+\section{The Model}
+\subsection{Design Variables}
+The design variables for the problem are as follows:
+\begin{itemize}
+	\item The number of option contracts to purchase for each security
+	\item Surplus and Deficit penatlies for each scenario, activated when the $target$ is not met
+\end{itemize}
+
+\subsection{Optimization Problem}
+
+\begin{equation*}
+\label{eqn:opt_opt}
+\begin{aligned}
+& \text{maximize}
+& \text{target} - \sum_{i=0}^{n} \pi_{i}  (P_{s} S^{i} - P_{d} D^{i}) \\
+& \text{subject to}\\
+& & \sum_{j=0}^{2} price_j  x_j = \text{budget} \\
+& & c_{1}^{i} x_{1} + c_{2}^{i} x_{2} + S^{i} - D^{i} = \text{target} \\
+& & x_j \geq 0
+\end{aligned}
+\end{equation*}
+Where:
+\begin{conditions*}
+budget & the total allowable dollar value to allocate between options \\
+target & the budget multiplied by expected return  (\%) \\
+price_j & price of one option contract of option $j$ \\
+S^{i} & surplus penalty for $i^{th}$ scenario \\
+D^{i} & deficit penalty for $i^{th}$ scenario \\
+c^{i}_{j} & expected return for scenario $i$ for option $j$ \\
+\pi^i & penalty weighting for scenario $i$ (represents likelihood of occurance) \\
+\end{conditions*}
+
+\subsection{Penalty weights}
+
+\section{Simulation}
+The set up of the problem begins with the design of the binomial trees. The complexity of the problem stems from the number of time periods and not the number of assets used. For this reason only 2 assets were chosen; BMO.TO and PFE. The number of time periods that was chosen was 4, yielding 5 leafs in each tree and giving rise to 25 possible scenarios. 
+
+To build the Jarrow-Rudd tree the underlying asset's information used can be found in Table~\ref{tab:thetable}.
+
+\begin{table}[H]
+	\centering
+    \begin{tabular}{|l|l|l|}
+    \hline
+    ~                                 & BMO.TO & PFE   \\ \hline
+    Initial Stock Price (Jan 1, 2013) & 57.90  & 24.87 \\ \hline
+    Strike Price                      & 60     & 28    \\ \hline
+    Volatility                        & 9\%    & 12\%  \\ \hline
+    Time to Maturity (months)         & 12     & 12    \\ \hline
+    Risk-Free Interest Rate           & 3\%    & 3\%   \\ \hline
+    \end{tabular}
+    \caption {Asset and Option Details}
+    \label{tab:thetable}
+\end{table}
+
+
+The volatility for each asset was calculated using the annualized volatility [4]. The strike price was chosen arbitrarily, but  also to represent an actual option contract.
+
+	Using the implementation by Sanjiv Das and Brian Granger [5], as shown in <APPENDIX X> it yields two trees for each asset. One tree is the fair option price for each state, and the other tree is the predicted stock price for each state. Based on the given information, the expected return for each scenario is calculated using Equation~\eqref{eq:expreturn}.
+
+\begin{equation}\label{eq:expreturn}
+	Return = max((p_{Ni} - p_s) - p_{opt}, -p_{opt})
+\end{equation}
+Where:
+\begin{conditions*}
+p_{Ni} & price in the last time period of the $i_{th}$ \\
+p_s & strike price \\
+p_{opt} & price of one option contract \\
+\end{conditions*}
 
 \section{Two Option Portfolio}
+A two option portfolio was tested and modified to learn how to implement two-stage stochastic programming and understand how it opterates. The next section outlines the starting conditions and parameters used in the optimization. In later section, these paramters are tweaked and results discussed.
+
+\subsection{Setup}
+Table~\ref{tab:init_cond} specifies the initial conditions for the first optimization procedure:
+\begin{table}[H]
+	\centering
+    \begin{tabular}{|l|l|}
+    \hline
+    	budget & \$1000 \\ \hline
+	desired ROI & 10\% \\ \hline
+	target & \$1100 \\ \hline
+	$P_s$ & 0.1, 0.01 \\ \hline
+	$P_d$ & 0.1, 0.01 \\ \hline
+	time to maturity & 6, 12 \\ \hline
+	periods & 4 \\ \hline
+    \end{tabular}
+    \caption {Initial conditions}
+    \label{tab:init_cond}
+\end{table}
+
+\subsection{Results}
+The optimal result is found in Tables~\ref{tab:result_1}, \ref{tab:result_2}.
+The surplus and deficit terms are not included, but rather the overall penalty for simplicity (there are 25 scenarios and they do not all need to be listed).
+Also, the number of contracts for each security has been rounded to the nearest whole contract, as you cannot purchase a partial contract.
+
+\begin{table}[H]
+	\centering
+    \begin{tabular}{|l|l|}
+    \hline
+    	objective value & 993.04 \\ \hline
+	contracts BMO.TO & 386 \\ \hline
+	contracts PFE & 582 \\ \hline
+	total pentaly & 106.96 \\ \hline
+    \end{tabular}
+    \caption {12-month horizon portfolio, 0.1 penalty}
+    \label{tab:result_1}
+\end{table}
+
+\begin{table}[H]
+	\centering
+    \begin{tabular}{|l|l|}
+    \hline
+    	objective value & 1089.30 \\ \hline
+	contracts BMO.TO & 386 \\ \hline
+	contracts PFE & 582 \\ \hline
+	total pentaly & 10.70 \\ \hline
+    \end{tabular}
+    \caption {12-month horizon portfolio, 0.01 penalty}
+    \label{tab:result_2}
+\end{table}
+
+\begin{table}[H]
+	\centering
+    \begin{tabular}{|l|l|}
+    \hline
+    	objective value & 991.52\\ \hline
+	contracts BMO.TO & 870 \\ \hline
+	contracts PFE & 1000 \\ \hline
+	total pentaly & 108.49 \\ \hline
+    \end{tabular}
+    \caption {6-month horizon portfolio, 0.1 penalty}
+    \label{tab:result_2}
+\end{table}
+
+\begin{table}[H]
+	\centering
+    \begin{tabular}{|l|l|}
+    \hline
+    	objective value & 1089.15 \\ \hline
+	contracts BMO.TO & 870 \\ \hline
+	contracts PFE & 1000 \\ \hline
+	total pentaly & 10.85 \\ \hline
+    \end{tabular}
+    \caption {6-month horizon portfolio, 0.01 penalty}
+    \label{tab:result_2}
+\end{table}
+
+\subsection{Discussion}
+%sur[/def large, but essentially cancel each other out
+%changing the PS  has a significant impact on the results
+%if penalites are made different, the problem ``blows up''. not sure why this happens
 
 \section{n-option portfolio}
 this can easily be extended to encompass a larger portfolio, but just requires more data
 
-\section{Future Work}
 % include stock and other securities in model to make a well balanced portfolio
 % consider options over longer periods - using the real option data
 % include more options in model - this doesn't change calculations, just increases computation
+% stochastic modellig of option prices (that paper I found) - more accurate option pricing
 
-\section{Conclusion}
+\section{Recommendations and Conclusions}
+Further improvements can be made to make this optimization problem yield better results. Changes to gathering the data in terms of choosing different time periods, will have a direct impact on the performance of the strategy. Certain time periods could be much more volatile for specific stocks due to external economic factors. 
+
+In addition, when choosing the stocks to be used in the portfolio, one key term that should be taken into account is diversification. The United States Securities and Exchange Commission describes diversification as follows: “The practice of spreading money among different investments to reduce risk is known as diversification. By picking the right group of investments, you may be able to limit your losses and reduce the fluctuations of investment returns without sacrificing too much potential gain.” [6]  One example of why diversification is required is to reduce industry specific risk. If a portfolio is only made up of technology stocks, and the technology industry is hit with increase costs in silicon or net neutrality, then the entire sector is affected. Therefore, the entire portfolio is dictated solely by the industry. If the portfolio is diversified, and one industry is doing poorly another industry could be doing well thereby hedging the positions one takes. 
+
+Choosing more assets from different industries could have significant effects on how the strategy performs, including increasing complexity, so it is important to note that making any of these changes could yield completely different outcomes.
+
+	In addition, many of the parameters were arbitrary. Looking more into determining the risk-free interest rate, actual strike prices from the Chicago Board Options Exchange, and even incorporating dividend payments would have significant impacts on how the option is priced. 
+	
+	Going forward, applications can be built off of this optimization carried out in this report. One such application is through the use of Arrow-Debreu Securities to create a riskless portfolio. Arrow-Debreu Securities have similar characteristics to that of a binomial option tree in that they have a specified payoff for a specific state in the market [7]. These securities allow for a riskless portfolio by hedging securities off of one another to create an equilibrium. One can theoretically calculate the payoff of a portfolio using a linear combination of all securities. Given a makeup of securities using the optimization techniques presented in this report, different types of securities (stocks, bonds, futures etc) can be introduced to a portfolio and optimized to yield the best payoff.
 
 
 \newpage
