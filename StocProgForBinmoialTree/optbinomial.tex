@@ -25,7 +25,7 @@
 \begin{document}
 \pagenumbering{roman}
 
-\waterlootitle{Two-Stage Stochastic Programming Option Portfolio Using Binomial Tree Pricing\\}{
+\waterlootitle{Two-Stage \& Chance Constrained Stochastic Programming Option Portfolio Using Binomial Tree Pricing\\}{
   SYDE 531: Final Project
 }{
   D. Scott Neil -- 20349210\\
@@ -84,11 +84,11 @@ The following assumptions were made to reduce the complexity of the design probl
 The design variables for the problem are as follows:
 \begin{itemize}
 	\item The number of option contracts to purchase for each security (both methods)
-	\item Surplus and Deficit penalties for each scenario, activated when the $target$ is not met (in Penalty Method)
+	\item Surplus and Deficit penalties for each scenario, activated when the $target$ is not met (in Two-Stage)
 	\item Target (in Chance Constrained)
 \end{itemize}
 
-\subsection{Stochastic Programming Problem - Penalty Method}
+\subsection{Two-Stage Stochastic Programming Problem}
 
 \begin{equation*}
 \label{eqn:opt_opt1}
@@ -115,7 +115,7 @@ c^{i}_{j} & expected return for scenario $i$ for option $j$ \\
 \theta & weight placed on variance of penalty terms
 \end{conditions*}
 
-\subsection{Stochastic Programming Problem - Chance Constraints}
+\subsection{Chance Constrained Stochastic Programming Problem}
 
 \begin{equation*}
 \label{eqn:opt_opt2}
@@ -175,7 +175,7 @@ p_{opt} & price of one option contract \\
 \label{sec:two_opt_port}
 A two option portfolio was tested and modified to learn how to implement two-stage stochastic programming and understand how it operates. The next section outlines the starting conditions and parameters used in the optimization. In later section, these parameters are tweaked and results discussed.
 
-\subsection{Stochastic Programming - Penalty Method}
+\subsection{Two-Stage Stochastic Programming}
 Table~\ref{tab:init_cond} specifies the initial conditions for the optimization procedure.
 
 \begin{table}[H]
@@ -226,29 +226,45 @@ Multiple parameters within the optimization were altered during testing, and it 
 	
 	Lastly, it is seen in the results table that there is minimal difference between the 6- and 12-month portfolios. We expected this and included the two scenarios to test the robustness of the problem formulation. If these results were vastly different, it would be due to an error in either the pricing scheme (i.e. binomial tree) or optimization problem. Corrections could then be made as needed and portfolios reconstructed.
 
-\subsection{Stochastic Programming - Chance Constraints}
-Table~\ref{tab:init_cond2} specifies the initial conditions for the optimization procedure.
+\subsection{Chance Constrained Stochastic Programming}
+The other method that was investigated was using the chance constraint method. The chance constraint method for this particular problem involves assigning a reliability term that asserts we maximize our target for a given probability. Assuming our allocations are random the chance constrained formulation is shown below:
+
+Table~\ref{tab:init_cond2} shows the initial conditions of the chance constrained optimization similar to the two-stage stochastic programming optimization.
+
 \begin{table}[H]
 	\centering
-    \begin{tabular}{|l|l|}
-    \hline
-    	\textbf{parameter} & \textbf{value} \\ \hline
-    	budget & \$1000 \\ \hline
-	desired ROI & 10\% \\ \hline
-	target & \$1100 \\ \hline
-	$P_s$ & 0.01 \\ \hline
-	$P_d$ & 0.01 \\ \hline
-	$\theta$ & 0.1 \\ \hline
+\begin{tabular}{|l|l|}
+\hline
+	\textbf{parameter} & \textbf{value} \\ \hline
+	budget & \$1000 \\ \hline
 	time to maturity & 6\\ \hline
 	periods & 4 \\ \hline
-    \end{tabular}
-    \caption {Initial conditions}
-    \label{tab:init_cond2}
+\end{tabular}
+\caption {Initial conditions}
+\label{tab:init_cond2}
 \end{table}
 
 \subsubsection{Results}
+The optimization was run using different reliability methods in the attempt to produce the best results. Table~\ref{tab:result_cc} shows the corresponding optimizations. 
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+	~ & \textbf{30\% Reliability} & \textbf{62.15\% Reliability} & \textbf{90\% Reliability} \\ \hline
+	obj\_fun value & 6057 & 0.82 & -2837 \\ \hline
+	BMO.TO & 0 & 0 & 993 \\ \hline
+	PFE & 8093 & 8093 & 0\\ \hline
+\end{tabular}
+\caption {Varying Reliability Portfolios}
+\label{tab:result_cc}
+\end{table}
 
 \subsubsection{Discussion}
+
+Based on the results, it was found that the optimization did not perform well. The investor would have to accept that they only break even 62.15\% of the time. The maximization was very sensitive to changes in the reliability and as such the allocations varied significantly too. With an increased reliability, the objective function would actually yield a negative return which is not acceptable in the investing world. Conversely, the optimization would only produce positive returns when the reliability dropped below 62.15\% reliability. 
+
+	The results can be explained due to the simplicity of the portfolio. The portfolio’s 2 assets limit the range in variability and the 5 time periods does not produce a large number of outcomes. This can be observed due to the fact that to produce positive returns the entire portfolio’s budget is allocated to asset 2, and for a negative return the entire budget is allocated to asset 1. This proves that the two assets while they would work well together in theory, the allocation of an entire budget to one is not ideal and does not produce a good hedge. 
 
 
 \section{Recommendations and Conclusions}
