@@ -25,7 +25,7 @@
 \begin{document}
 \pagenumbering{roman}
 
-\waterlootitle{Two-Stage \& Chance Constrained Stochastic Programming Option Portfolio Using Binomial Tree Pricing\\}{
+\waterlootitle{Two-Stage \& Chance Constrained Stochastic Programming Option Portfolio Optimization Using Binomial Tree Pricing\\}{
   SYDE 531: Final Project
 }{
   D. Scott Neil -- 20349210\\
@@ -40,7 +40,7 @@
 \setlength{\parindent}{1cm}
 
 \section{Introduction}
-The stock market involves the buying and selling of ownership (shares) of a public company.  There is an agreed upon price with which the trade is executed, and is eventually settled through an exchange (TSX, NASDAQ, etc.).  However, the stock market is just one aspect of the entire capital market. The derivatives market, for example, consists of financial instruments that are derived from other forms of securities (stocks, bonds, futures).  One of the better-known instruments is the option since one of the underlying assets is a stock. For the scope of this report the author will focus solely on options.
+The stock market involves the buying and selling of ownership (shares) of a public company.  There is an agreed upon price with which the trade is executed, and is eventually settled through an exchange (TSX, NASDAQ, etc.).  However, the stock market is just one aspect of the entire capital market. The derivatives market, for example, consists of financial instruments that are derived from other forms of securities (stocks, bonds, futures).  One of the better-known instruments is the option since one of the underlying assets is a stock. For the scope of this report the authors will focus solely on options.
 
 A stock option can be very beneficial to any sophisticated portfolio. It is essentially ``a contract that gives the buyer the right, but not the obligation, to buy or sell [a stock] at a specific price on or before a certain date.'' \cite{volatility}. The buyer must purchase the option at a price outlined in the options market. In brief, someone is selling you a right, which means the buyer must also pay a premium to enter in the contract. For the purpose of this report the researchers will use European Options, which are options that can only be exercised on the expiry date \cite{euro_option}. 
 
@@ -58,15 +58,13 @@ For this project, the Jarrow-Rudd binomial pricing model is used, which assumes 
  
 Portfolio optimization is the process of choosing the proportions of various assets to help improve a portfolio based on certain criterion. The criterion is combined directly or indirectly with considerations like the expected value of the portfolio’s rate of return, returns variability and other measures of financial risk. The goal of portfolio optimization is to reduce the risk an investor takes on while trying to maximize profit with an uncertainty of market conditions.
 
-Portfolios are constructed using Two-Stage Stochastic Programming, obtaining scenarios from the binomial trees of each option. Two methods are used: the ``Penalty Method'' and Chance Constraints. Penalty Method creates a scenario for each possible outcome of the market and weights each of these by their associated likelihood of occurrence. Penalties are added when a specific scenario fails to meet the desired target. Chance Constraints aim to meet the highest target return possible at a given reliability. The reliability is set prior to optimizing and desired target found in the process. Section \ref{sec:two_opt_port} contains results and a discussion of each of the methods.
+Portfolios are constructed using Stochastic Programming, obtaining scenarios from the binomial trees of each option. Two methods are used: Two-Stage and Chance Constraints. Two-Stage programming creates a scenario for each possible outcome of the market and weights each of these by their associated likelihood of occurrence. Penalties are added when a specific scenario fails to meet the desired target. Chance Constraints aim to meet the highest target return possible at a given reliability. The reliability is set prior to optimizing and desired target found in the process. Section \ref{sec:two_opt_port} contains results and a discussion of each of the methods.
 
 
 \section{Objective}
 To create an optimal portfolio of two independent options, priced using the Jarrow Rudd binomial model \cite{jarrow1983option, jrudd_other, jrudd_impl}, with the two-stage stochastic programming method.
 
 \section{Assumptions}
-%The assumptions made are: the options mature in 4 months, the interest thing is 0.03, periods are measured as a month, other stuff
-
 The following assumptions were made to reduce the complexity of the design problem:
 \begin{itemize}
 	\item The time period to calculate volatility is from November 1, 2012 to January 1, 2013
@@ -88,6 +86,7 @@ The design variables for the problem are as follows:
 	\item Target (in Chance Constrained)
 \end{itemize}
 
+\newpage
 \subsection{Two-Stage Stochastic Programming Problem}
 
 \begin{equation*}
@@ -139,6 +138,7 @@ price_j & price of one option contract of option $j$ \\
 \section{Simulating Option Prices}
 The set up of the problem begins with the design of the binomial trees. The complexity of the problem stems from the number of time periods and not the number of assets used. For this reason only 2 assets were chosen; BMO.TO and PFE. The number of time periods that was chosen was 4, yielding 5 leafs in each tree and giving rise to 25 possible scenarios. 
 
+\newpage
 To build the Jarrow-Rudd tree the underlying asset's information used can be found in Table~\ref{tab:thetable}.
 
 \begin{table}[H]
@@ -159,7 +159,7 @@ To build the Jarrow-Rudd tree the underlying asset's information used can be fou
 
 The volatility for each asset was calculated using the annualized volatility (adapted from \url{https://gist.github.com/johntyree/4587049}). The strike price was chosen arbitrarily, but  also to represent an actual option contract.
 
-	Using the implementation by Sanjiv Das and Brian Granger \cite{jrudd_impl}, as shown in Appendix~\ref{ap:code} it yields two trees for each asset. One tree is the fair option price for each state, and the other tree is the predicted stock price for each state. Based on the given information, the expected return for each scenario is calculated using Equation~\eqref{eq:expreturn}.
+	Using the implementation by Sanjiv Das and Brian Granger \cite{jrudd_impl}, seen in $binomial\_tree.py$, a pricing method is build, which yields two trees for each asset. One tree is the fair option price for each state, and the other tree is the predicted stock price for each state. Based on the given information, the expected return for each scenario is calculated using Equation~\eqref{eq:expreturn}.
 
 \begin{equation}\label{eq:expreturn}
 	Return = max((p_{Ni} - p_s) - p_{opt}, -p_{opt})
@@ -218,13 +218,13 @@ Also, the number of contracts for each security has been rounded to the nearest 
 
 \subsubsection{Discussion}
 
-Multiple parameters within the optimization were altered during testing, and it was found that, in general, impact on the results were minimal. Firstly, changing the penalty weights, $P_s$ and $P_d$, only changed the objective function value, not allocation between assets. Multiple values, such as 0.01, 0.5, 1.0, were tested and all resulted in the same outcome. The researchers also attempted to make these values different, as a surplus in return is more favourable than a deficit, but this caused the <Surp, def> variables to increase greatly (to multi-million values). The optimization procedure either does not complete successfully due to the parameter matrix becoming singular (if difference in penalty weights is relatively large), or simply results in extremely large total penalty, standard deviation, and design variable values (if difference is relatively small). We’re unsure why this is occurring, so reverted to having these parameters equal.
+Multiple parameters within the optimization were altered during testing, and it was found that, in general, impact on the results were minimal. Firstly, changing the penalty weights, $P_s$ and $P_d$, only changed the objective function value, not allocation between assets. Multiple values, such as 0.01, 0.5, 1.0, were tested and all resulted in the same outcome. Making the values different was also attempted, as a surplus in return is more favourable than a deficit, but this caused the penatly terms to increase greatly (to multi-million values). The optimization procedure either does not complete successfully due to the parameter matrix becoming singular (if difference in penalty weights is relatively large), or simply results in extremely large total penalty, standard deviation, and design variable values (if difference is relatively small). We’re unsure why this is occurring, so reverted to having these parameters equal.
 
-	Next, the problem was tested with and without the variance term in the objective function. It was found that adding this term has no impact on the allocation. The researchers again are unsure why this is the case, but even with testing multiple values of $\theta$ similar results were observed. It does affect the objective function value, as expected, but does not alter any of the design parameter values.
+Next, the problem was tested with and without the variance term in the objective function. It was found that adding this term has no impact on the allocation. The researchers again are unsure why this is the case, but even with testing multiple values of $\theta$ similar results were observed. It does affect the objective function value, as expected, but does not alter any of the design parameter values.
 	
-	Additionally, we initially observed that in each scenario, the difference between the surplus and deficit parameters is essentially zero, but their values are quite large. It was then determined that a constraint was needed on each of these parameters to ensure their values were greater than, or equal to, zero. This shifted the penalty all to one term, as it should, which altered the allocation of assets in both portfolios.
+Additionally, we initially observed that in each scenario, the difference between the surplus and deficit parameters is essentially zero, but their values are quite large. It was then determined that a constraint was needed on each of these parameters to ensure their values were greater than, or equal to, zero. This shifted the penalty all to one term, as it should, which altered the allocation of assets in both portfolios.
 	
-	Lastly, it is seen in the results table that there is minimal difference between the 6- and 12-month portfolios. We expected this and included the two scenarios to test the robustness of the problem formulation. If these results were vastly different, it would be due to an error in either the pricing scheme (i.e. binomial tree) or optimization problem. Corrections could then be made as needed and portfolios reconstructed.
+Lastly, it is seen in the results table that there is minimal difference between the 6- and 12-month portfolios. We expected this and included the two scenarios to test the robustness of the problem formulation. If these results were vastly different, it would be due to an error in either the pricing scheme (i.e. binomial tree) or optimization problem. Corrections could then be made as needed and portfolios reconstructed.
 
 \subsection{Chance Constrained Stochastic Programming}
 The other method that was investigated was using the chance constraint method. The chance constraint method for this particular problem involves assigning a reliability term that asserts we maximize our target for a given probability. Assuming our allocations are random the chance constrained formulation is shown below:
@@ -260,28 +260,41 @@ The optimization was run using different reliability methods in the attempt to p
 \label{tab:result_cc}
 \end{table}
 
-\subsubsection{Discussion}
-Based on the results, it was found that the optimization did not perform well. The investor would have to accept that they only break even 62.15\% of the time. The maximization was very sensitive to changes in the reliability and as such the allocations varied significantly too. With an increased reliability, the objective function would actually yield a negative return which is not acceptable in the investing world. Conversely, the optimization would only produce positive returns when the reliability dropped below 62.15\% reliability. 
+\subsubsection{Discussion} %Matt Read
+Based on the results, it was found that the optimization did not perform well. If these two securities constituted the entire portfolio, a ``break even'' return is only observed at a rate of approximately 62\%. The maximization was very sensitive to changes in the reliability and as such the allocations varied significantly too. With an increased reliability, the objective function would actually yield a negative return, which is not acceptable. Conversely, the optimization would only produce positive returns when the reliability was below 62\%. 
 
-	The results can be explained due to the simplicity of the portfolio. The portfolio’s 2 assets limit the range in variability and the 5 time periods does not produce a large number of outcomes. This can be observed due to the fact that to produce positive returns the entire portfolio’s budget is allocated to asset 2, and for a negative return the entire budget is allocated to asset 1. This proves that the two assets while they would work well together in theory, the allocation of an entire budget to one is not ideal and does not produce a good hedge. 
+The results can be explained due to the simplicity of the portfolio.
+Only considering two assets and four time periods results in a limited number of outcomes.
+Additionally, neither of these options are good investments; both assets only have positive returns in their uppermost scenarios, with BMO.TO also producing a positive return at its second highest.
+The average return for BMO.TO is 0.78 and PFE is 0.27, and variance of BMO.TO is 8.09 and PFE 0.81 -- on average, neither asset will return the initially invested capital.
+Therefore, it is very difficult to establish a well performining portfolio with this limited universe and poor performing assets.
+This is discussed in the following sections and it is recommended that a more diversified portfolio is considered.
 
-\subsubsection{Comparison}
-Comparing the methods between the Two-Stage Stochastic Programming and Chance Constrained methods theres a few conclusions that can be made. One glaring observation is that the Two-Stage method produced positive returns regardless of the time horizon while the Chance Constrained method was binary producing only positive returns if it was below the threshold reliability of 62.15\%. This is due to the fact that in the Two-Stage method there is a penalty associated with not meeting the desired return so the optimization attempts to reduce that penalty. The Chance Constrained method however has no penalty associated with not meeting the return but instead attempts to maximize the target while maintaining a reliability. For this reason, the method can have negative returns while maintaining reliability.
+%The portfolio’s 2 assets limit the range in variability and the 5 time periods do not produce a large number of outcomes.
+%This can be observed due to the fact that to produce positive returns the entire portfolio’s budget is allocated to PFE, and for a negative return the entire budget is allocated to BMO.TO. 
+%This proves that the two assets while they would work well together in theory, the allocation of an entire budget to one is not ideal and does not produce a good hedge.
 
-    Another observation that can be made between the two is that the Two-Stage method allocates the budget in a more even manner compared to the Chance Constrained method. This could potentially be due to the fact that the assets do not compliment each other well in the Chance Constrained method and the variability in the assets return make it difficult to reach the desired reliability. Increasing the number of assets could have much different effects and should be investigated. 
+\section{Comparison of Methods} %Matt Read
+Comparing the methods between the Two-Stage Stochastic Programming and Chance Constrained methods there is a few conclusions that can be made. One observation is that the Two-Stage method produced positive returns regardless of the time horizon, while the Chance Constrained method was binary producing only positive returns if it was below the threshold reliability of 62.15\%. This is due to the fact that in the Two-Stage method there is a penalty associated with not meeting the desired return so the optimization attempts to reduce that penalty. The Chance Constrained method however has no penalty associated with not meeting the return, but instead attempts to maximize the target while maintaining a specified reliability. For this reason, the method can have negative returns, while maintaining reliability. Also Chance Constraint method doesn't consider each potential scenario individual, but rather uses averages. Information is lost by doing this, which may contribute to its weaker performance.
+
+Another observation made is that the Two-Stage method allocates the budget in a more even manner compared to the Chance Constrained method. 
+One hypothesis is that the assets may not compliment each other well and this is exposed more in the Chance Constrained method. 
+Another cause could be due to differences in variance of price or payoff of the assets. In this example, BMO.TO has positive returns in two of the five scenarios, where as PFE only in one. Therefore allocating all to BMO.TO in cases of high reliability is understandable as their are more opportunities to make positive returns and therefore maximize return (or in this case minimize losses).
+Ultimately, neither of these assets are strong performers and increasing the number and diversity would have much different results and should be investigated.
 
 \section{Recommendations and Conclusions}
 Further improvements can be made to make this optimization problem yield better results. Changes to gathering the data in terms of choosing different time periods, will have a direct impact on the performance of the strategy. Certain time periods could be much more volatile for specific stocks due to external economic factors. 
 
-In addition, when choosing the stocks to be used in the portfolio, one key term that should be taken into account is diversification. The United States Securities and Exchange Commission describes diversification as follows: “The practice of spreading money among different investments to reduce risk is known as diversification. By picking the right group of investments, you may be able to limit your losses and reduce the fluctuations of investment returns without sacrificing too much potential gain.” \cite{diversity}.  One example of why diversification is required is to reduce industry specific risk. If a portfolio is only made up of technology stocks, and the technology industry is hit with increase costs in silicon or net neutrality, then the entire sector is affected. Therefore, the entire portfolio is dictated solely by the industry. If the portfolio is diversified, and one industry is doing poorly another industry could be doing well thereby hedging the positions one takes. 
-
-Choosing more assets from different industries could have significant effects on how the strategy performs, including increasing complexity, so it is important to note that making any of these changes could yield completely different outcomes.
+In addition, when choosing the stocks to be used in the portfolio, one key term that should be taken into account is diversification. The United States Securities and Exchange Commission describes diversification as follows: “The practice of spreading money among different investments to reduce risk is known as diversification. By picking the right group of investments, you may be able to limit your losses and reduce the fluctuations of investment returns without sacrificing too much potential gain.” \cite{diversity}.  One example of why diversification is required is to reduce industry specific risk. If a portfolio is only made up of technology stocks, and the technology industry is hit with increase costs in silicon or net neutrality, then the entire sector is affected. Therefore, the entire portfolio is dictated solely by the industry. If the portfolio is diversified, and one industry is doing poorly another industry could be doing well thereby hedging the positions one takes. Choosing more assets from different industries could have significant effects on how the strategy performs, including increasing complexity, so it is important to note that making any of these changes could yield completely different outcomes.
 
 In addition, many of the parameters were arbitrary. Looking more into determining the risk-free interest rate, actual strike prices from the Chicago Board Options Exchange, and even incorporating dividend payments would have significant impacts on how the option is priced. 
 	
 Going forward, applications can be built off of this optimization carried out in this report. One such application is through the use of Arrow-Debreu Securities to create a riskless portfolio. Arrow-Debreu Securities have similar characteristics to that of a binomial option tree in that they have a specified payoff for a specific state in the market \cite{tirole2010theory, AD_secs}. These securities allow for a riskless portfolio by hedging securities off of one another to create an equilibrium. One can theoretically calculate the payoff of a portfolio using a linear combination of all securities. Given a makeup of securities using the optimization techniques presented in this report, different types of securities (stocks, bonds, futures etc) can be introduced to a portfolio and optimized to yield the best payoff.
 	
 Lastly, the method of binomial trees for pricing options is likely not the most accurate model. One change could be the introduction of trinomial trees. These have three transitions: up, down, or neutral. This may better represent movements of securities, but improvements would need to be tested. Research has also been conducted in the use of Stochastic Programming for pricing options, using scenario trees \cite{stoc_prog_option}. These again are similar to binomial trees, but have $n$ transitions to the next stage from each state, making the model potentially much more complex (and increasing scenarios greatly), but also more accurate. Improvements again would need to be tested to understand if the increased pricing accuracy is worth the added complexity.
+
+%Matt Read
+In conclusion, these two methods are powerful for calculating optimal portfolios, but further research needs to be conducted. Increasing the number of assets, time periods, and diversity (in terms of sector and asset class) should be investigated. Additionally, alternative option pricing methods should tested and accuracy compared against actual prices. Both of these will increase the complexity of the problem, but will generate more meaningful results and combine to formulate a more accurate representation of portfolio construction and financial markets.
 
 
 \newpage
@@ -291,9 +304,9 @@ Lastly, the method of binomial trees for pricing options is likely not the most 
 
 \bibliography{bib}
 
-\newpage
-\begin{appendices}
-\section{Implementation} \label{ap:code}
+%\newpage
+%\begin{appendices}
+%\section{Implementation} \label{ap:code}
 
-\end{appendices}
+%\end{appendices}
 \end{document}
