@@ -8,6 +8,8 @@
 \usepackage{float}
 \usepackage[toc]{glossaries}
 \usepackage[toc,page]{appendix}
+\usepackage{listings}
+\usepackage{pdfpages}
 
 \newcolumntype{P}[1]{>{\RaggedRight\hspace{0pt}}p{#1}}
 
@@ -260,7 +262,7 @@ The optimization was run using different reliability methods in the attempt to p
 \label{tab:result_cc}
 \end{table}
 
-\subsubsection{Discussion} %Matt Read
+\subsubsection{Discussion}
 Based on the results, it was found that the optimization did not perform well. If these two securities constituted the entire portfolio, a ``break even'' return is only observed at a rate of approximately 62\%. The maximization was very sensitive to changes in the reliability and as such the allocations varied significantly too. With an increased reliability, the objective function would actually yield a negative return, which is not desireable. Conversely, the optimization would only produce positive returns when the reliability was below 62\%. 
 
 The results can be explained due to the simplicity of the portfolio.
@@ -270,11 +272,8 @@ The average return for BMO.TO is 0.78 and PFE is 0.27, and variance of BMO.TO is
 It is therefore very difficult to establish a well performining portfolio with this limited universe and poor performing assets.
 This is discussed in the following sections and it is recommended that a more diversified portfolio be considered.
 
-%The portfolio’s 2 assets limit the range in variability and the 5 time periods do not produce a large number of outcomes.
-%This can be observed due to the fact that to produce positive returns the entire portfolio’s budget is allocated to PFE, and for a negative return the entire budget is allocated to BMO.TO. 
-%This proves that the two assets while they would work well together in theory, the allocation of an entire budget to one is not ideal and does not produce a good hedge.
 
-\section{Comparison of Methods} %Matt Read
+\section{Comparison of Methods}
 Comparing the methods between the Two-Stage Stochastic Programming and Chance Constrained methods there are a few conclusions that can be made. One observation is that the Two-Stage method produced positive returns regardless of the time horizon, while the Chance Constrained method was binary producing only positive returns if it was below the threshold reliability of 62.15\%. This is due to the fact that in the Two-Stage method there is a penalty associated with not meeting the desired return so the optimization attempts to reduce that penalty. The Chance Constrained method however has no penalty associated with not meeting the return, but instead attempts to maximize the target while maintaining a specified reliability. For this reason, the method can have negative returns, while maintaining reliability. Also the Chance Constrained method does not consider each potential scenario individually, but uses averages instead. Information is lost by doing this, which may contribute to its weaker performance.
 
 Another observation made is that the Two-Stage method allocates the budget in a more even manner compared to the Chance Constrained method. 
@@ -293,7 +292,6 @@ Going forward, applications can be built off of this optimization carried out in
 	
 Lastly, the method of binomial trees for pricing options is likely not the most accurate model. One change could be the introduction of trinomial trees. These have three transitions: up, down, or neutral. This may better represent movements of securities, but improvements would need to be tested. Research has also been conducted in the use of Stochastic Programming for pricing options, using scenario trees \cite{stoc_prog_option}. These again are similar to binomial trees, but have $n$ transitions to the next stage from each state, making the model potentially much more complex (and increasing scenarios greatly), but also more accurate. Improvements again would need to be tested to understand if the increased pricing accuracy is worth the added complexity.
 
-%Matt Read
 In conclusion, these two methods are powerful for calculating optimal portfolios, but further research needs to be conducted. Increasing the number of assets, time periods, and diversity (in terms of sector and asset class) should be investigated. Additionally, alternative option pricing methods should be tested and their accuracy compared against actual prices. Both of these will increase the complexity of the problem, but will generate more meaningful results and combine to formulate a more accurate representation of portfolio construction and financial markets.
 
 
@@ -304,9 +302,16 @@ In conclusion, these two methods are powerful for calculating optimal portfolios
 
 \bibliography{bib}
 
-%\newpage
-%\begin{appendices}
-%\section{Implementation} \label{ap:code}
+\newpage
+\begin{appendices}
+\section{Implementation} \label{ap:code}
+\subsection{Binomial Tree}
+\lstinputlisting[language=Python]{binomial_tree.py}
 
-%\end{appendices}
+\subsection{Option Class}
+\lstinputlisting[language=Python]{option.py}
+
+\subsection{Optimization Procedures}
+\includepdf[pages={-}]{OptimizationPythonNotebook.pdf}
+\end{appendices}
 \end{document}
